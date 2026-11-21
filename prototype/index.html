@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SCM Fulfillment — UI Prototype</title>
+  <link rel="stylesheet" href="css/prototype.css" />
+</head>
+<body>
+  <div class="prototype-shell">
+    <aside class="proto-sidebar">
+      <div class="proto-brand">
+        <h1>SCM Fulfillment</h1>
+        <p>Interactive wireframe · 1280×800</p>
+      </div>
+      <div class="proto-mode">
+        <button type="button" id="mode-preview" class="is-active">Preview</button>
+        <button type="button" id="mode-grid">All screens</button>
+      </div>
+      <nav class="proto-flows" id="screen-list" aria-label="Screens"></nav>
+    </aside>
+    <main class="proto-main">
+      <div class="proto-toolbar">
+        <span class="screen-title" id="toolbar-title">Login · Public</span>
+        <span>Arrow keys: prev / next screen</span>
+        <div class="zoom">
+          <label for="zoom-range">Zoom</label>
+          <input type="range" id="zoom-range" min="50" max="100" value="85" />
+          <span id="zoom-label">85%</span>
+        </div>
+      </div>
+      <div id="present-canvas" class="present-canvas is-preview"></div>
+    </main>
+  </div>
+  <script src="js/screens/helpers.js"></script>
+  <script src="js/screens/register-all.js"></script>
+  <script src="js/render-screens.js"></script>
+  <script src="js/navigation.js"></script>
+</body>
+</html>
