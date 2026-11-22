@@ -1,3 +1,5 @@
+import type { ListItemsQuery } from "./items.schema";
+
 export interface Item {
     id: number;
     sku: string;
@@ -8,6 +10,16 @@ export interface Item {
     created_at: string;
     updated_at: string;
 };
+
+export interface ItemListResult {
+    data: Item[];
+    meta: {
+        page: number;
+        pageSize: number;
+        total: number;
+        totalPages: number;
+    }
+}
 
 export interface CreateItemInput {
     sku: string;
@@ -23,3 +35,5 @@ export interface UpdateItemInput {
     quantity?: number;
     unit_price?: number;
 };
+
+export type { ListItemsQuery };

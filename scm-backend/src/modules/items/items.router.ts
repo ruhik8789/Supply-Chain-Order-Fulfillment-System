@@ -6,11 +6,25 @@ import {
     updateItemSchema,
 } from './items.schema.js';
 import * as itemsRepo from './items.repository.js';
+import { sendAppError } from '../../errors/send-error.js';
+import { StatusCodes } from 'http-status-codes';
+import { parseListItemsQuery } from './items.validation.js';
 
 export const itemsRouter = Router();
 
-itemsRouter.get('/', (_req, res) => {
-    res.json(itemsRepo.findAllItems());
+// itemsRouter.get('/', (_req, res) => {
+//     res.json(itemsRepo.findAllItems());
+// });
+
+itemsRouter.get('/', (req: Request, res: Response) => {
+    const result = parseListItemsQuery(req.query);
+
+    if(!result.ok) {
+        sendAppError(res, result.error);
+        return;
+    }
+
+    res.status(StatusCodes.OK).json(itemsRepo.findItems(result.data));
 });
 
 itemsRouter.get('/:id', (req, res) => {

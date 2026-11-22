@@ -1,5 +1,5 @@
 import { db } from '../../db/database.js';
-import type { CreateItemInput, Item, UpdateItemInput } from './items.types.js';
+import type { CreateItemInput, Item, ItemListResult, ListItemsQuery, UpdateItemInput } from './items.types.js';
 
 const listStmt = db.prepare(`
   SELECT id, sku, name, description, quantity, unit_price, created_at, updated_at
@@ -79,4 +79,56 @@ export function updateItem(id: number, input: UpdateItemInput): Item | undefined
 export function deleteItem(id: number): boolean {
     const result = deleteStmt.run(id);
     return result.changes > 0;
+}
+
+const SORT_COLUMNS: Record<ListItemsQuery['sortBy'], string> = {
+    id: 'id',
+    name: 'name',
+    sku: 'sku',
+    created_at: 'created_at',
+    quantity: 'quantity',
+};
+
+export function findItems(query: ListItemsQuery): ItemListResult {
+    const where: string[] = [];
+    const params: unknown[] = [];
+
+    if (query.sku) {
+        where.push('sku = ?');
+        params.push(query.sku);
+    }
+    if (query.nameContains) {
+        where.push('name LIKE ?');
+        params.push(`%${query.nameContains}%`);
+    }
+
+    const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+
+    const countRow = db
+        .prepare(`SELECT COUNT(*) AS total FROM items ${whereSql}`)
+        .get(...params) as { total: number };
+
+    const total = countRow.total;
+    const offset = (query.page - 1) * query.pageSize;
+    const sortCol = SORT_COLUMNS[query.sortBy];
+    const sortDir = query.sortOrder === 'asc' ? 'ASC' : 'DESC';
+
+    const data = db
+        .prepare(
+            `SELECT id, sku, name, description, quantity, unit_price, created_at, updated_at
+       FROM items ${whereSql}
+       ORDER BY ${sortCol} ${sortDir}
+       LIMIT ? OFFSET ?`,
+        )
+        .all(...params, query.pageSize, offset) as Item[];
+
+    return {
+        data,
+        meta: {
+            page: query.page,
+            pageSize: query.pageSize,
+            total,
+            totalPages: total === 0 ? 0 : Math.ceil(total / query.pageSize),
+        },
+    };
 }
