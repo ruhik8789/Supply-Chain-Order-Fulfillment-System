@@ -22,5 +22,18 @@ export const itemIdParamSchema = z.object({
     id: z.coerce.number().int().positive(),
 });
 
+export const listItemsQuerySchema = z.object({
+    page: z.coerce.number().int().min(1).default(1),
+    pageSize: z.coerce.number().int().min(1).max(100).default(20),
+    sortBy: z
+        .enum(['id', 'name', 'sku', 'created_at', 'quantity'])
+        .default('id'),
+    sortOrder: z.enum(['asc', 'desc']).default('desc'),
+    sku: z.string().trim().min(1).optional(),
+    nameContains: z.string().trim().min(1).optional(),
+});
+
+export type ListItemsQuery = z.infer<typeof listItemsQuerySchema>;
+
 export type CreateItemBody = z.infer<typeof createItemSchema>;
 export type UpdateItemBody = z.infer<typeof updateItemSchema>;
