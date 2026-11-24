@@ -9,6 +9,7 @@ import * as itemsRepo from './items.repository.js';
 import { sendAppError } from '../../errors/send-error.js';
 import { StatusCodes } from 'http-status-codes';
 import { parseListItemsQuery } from './items.validation.js';
+import { itemsToCsv } from './items.export.js';
 
 export const itemsRouter = Router();
 
@@ -25,6 +26,24 @@ itemsRouter.get('/', (req: Request, res: Response) => {
     }
 
     res.status(StatusCodes.OK).json(itemsRepo.findItems(result.data));
+});
+
+itemsRouter.get('/export', (req: Request, res: Response) => {
+    const result = parseListItemsQuery(req.query);
+
+    if (!result.ok) {
+        sendAppError(res, result.error);
+        return;
+    }
+
+    const exportQuery = { ...result.data, page: 1, pageSize: 10_000 };
+    const items = itemsRepo.findItems(exportQuery);
+    const csv = itemsToCsv(items.data);
+
+    res.status(StatusCodes.OK);
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename=items.csv');
+    res.send(csv);
 });
 
 itemsRouter.get('/:id', (req, res) => {
